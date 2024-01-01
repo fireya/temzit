@@ -1,0 +1,12 @@
+{
+  "domain": "temzit",
+  "name": "Temzit heat pumps integration",
+  "codeowners": [
+    "@fireya"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/fireya/temzit",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/fireya/temzit/issues",
+  "version": "2024.1.1"
+}

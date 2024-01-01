@@ -16,6 +16,7 @@ from .coordinator import TemzitUpdateCoordinator
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.CLIMATE,
+    Platform.WATER_HEATER,
 ]
 
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorDeviceClass, SensorStateClass, UnitOfTemperature
-from homeassistant.const import UnitOfPower
+from homeassistant.const import UnitOfPower, UnitOfVolumeFlowRate
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 
@@ -28,6 +28,8 @@ async def async_setup_entry(hass, entry, async_add_devices):
             OutdoorSensor(coordinator),
             HotWaterSensor(coordinator),
             ConsumptionSensor(coordinator),
+            HeatPowerSensor(coordinator),
+            FlowSensor(coordinator),
             SupplySensor(coordinator),
             ReturnSensor(coordinator),
         )
@@ -152,4 +154,43 @@ class ConsumptionSensor(TemzitEntity, SensorEntity):
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         self._attr_native_value = self.coordinator.data.consumption
+        self.async_write_ha_state()
+
+
+class HeatPowerSensor(TemzitEntity, SensorEntity):
+    """Representation of a sensor."""
+
+    _attr_name = "Мощность нагрева"
+    _attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, coordinator):
+        """Pass coordinator to CoordinatorEntity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = coordinator.config_entry.entry_id + "_heat_power"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.data.heat_power
+        self.async_write_ha_state()
+
+class FlowSensor(TemzitEntity, SensorEntity):
+    """Representation of a sensor."""
+
+    _attr_name = "Проток"
+    _attr_native_unit_of_measurement = 'L/min'
+    _attr_device_class = "volume_flow"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, coordinator):
+        """Pass coordinator to CoordinatorEntity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = coordinator.config_entry.entry_id + "_flow"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self._attr_native_value = self.coordinator.data.flow
         self.async_write_ha_state()

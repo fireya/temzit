@@ -7,7 +7,7 @@ import logging
 import async_timeout
 
 from homeassistant.components import climate
-from homeassistant.components.climate import ClimateEntity, HVACMode
+from homeassistant.components.climate import ClimateEntity, HVACMode, ClimateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import TEMP_CELSIUS
 from homeassistant.core import HomeAssistant, callback
@@ -37,9 +37,12 @@ async def async_setup_entry(
 
 class TemzitClimate(TemzitEntity, ClimateEntity):
     """Representation of a Climate."""
-    _attr_name = "Термостат"
+    _attr_name = "Обогрев дома"
     _attr_temperature_unit = TEMP_CELSIUS
+    _attr_supported_features = ClimateEntityFeature.AUX_HEAT
     _attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
+    _attr_hvac_mode = HVACMode.OFF
+    _attr_is_aux_heat = False
 
 
 
@@ -56,7 +59,7 @@ class TemzitClimate(TemzitEntity, ClimateEntity):
         # which is done here by appending "_cover". For more information, see:
         # https://developers.home-assistant.io/docs/entity_registry_index/#unique-id-requirements
         # Note: This is NOT used to generate the user visible Entity ID used in automations.
-        self._attr_unique_id = coordinator.config_entry.entry_id + "climate"
+        self._attr_unique_id = coordinator.config_entry.entry_id + "_climate"
 
         # This is the name for this *entity*, the "name" attribute from "device_info"
         # is used as the device name for device screens in the UI. This name is used on
@@ -67,13 +70,9 @@ class TemzitClimate(TemzitEntity, ClimateEntity):
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         # self._attr_is_on = self.coordinator.data[self.idx]["state"]
-        self._attr_current_temperature
+        self._attr_current_temperature = self.coordinator.data.return_temp
+        self._attr_target_temperature = self.coordinator.data.target_water_temp
+        self._attr_hvac_mode = HVACMode.HEAT
+        self._attr_is_aux_heat = self.coordinator.data.main_heater_is_on
+
         self.async_write_ha_state()
-
-    @property
-    def hvac_mode(self) -> HVACMode | None:
-        return HVACMode.OFF
-
-    @property
-    def current_temperature(self) -> float | None:
-        return self.coordinator.data.indoor_temp

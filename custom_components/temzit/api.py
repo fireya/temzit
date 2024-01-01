@@ -116,6 +116,34 @@ class temzit_state:
     def consumption(self) -> float:
         return self.convert(28, 30) / 10
 
+    @property
+    def target_indoor_temp(self) -> float:
+        return self.convert(49, 50)
+
+    @property
+    def target_water_temp(self) -> float:
+        return self.convert(50, 51)
+
+    @property
+    def target_hotwater_temp(self) -> float:
+        return self.convert(51, 52)
+
+    @property
+    def heat_power(self) -> float:
+        return (self.flow /60) * 4200 * (self.supply_temp - self.return_temp) / 1000
+
+    @property
+    def flow(self) -> float:
+        return int.from_bytes(self.data[18:20], byteorder="little", signed=False)
+
+    @property
+    def boiler_heater_is_on(self) -> bool:
+        return self.convert(26, 28)>0
+
+    @property
+    def main_heater_is_on(self) -> bool:
+        return self.convert(24, 26)>0
+
     def convert(self, s: int, e: int) -> int:
         return int.from_bytes(self.data[s:e], byteorder="little", signed=True)
 
